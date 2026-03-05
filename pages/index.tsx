@@ -1,3 +1,4 @@
+import Head from "next/head";
 import { useMemo, useState } from "react";
 
 const PLATFORMS = ["TikTok", "Instagram Reels", "YouTube Shorts"] as const;
@@ -15,7 +16,6 @@ const STYLES = [
   "Challenge",
   "List Hook",
 ] as const;
-
 type Style = (typeof STYLES)[number];
 
 export default function Home() {
@@ -29,15 +29,10 @@ export default function Home() {
   const [hooks, setHooks] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
 
-  const canGenerate = useMemo(
-    () => topic.trim().length > 3 && !loading,
-    [topic, loading]
-  );
+  const canGenerate = useMemo(() => topic.trim().length > 3 && !loading, [topic, loading]);
 
   function toggleStyle(s: Style) {
-    setStyles((prev) =>
-      prev.includes(s) ? prev.filter((x) => x !== s) : [...prev, s]
-    );
+    setStyles((prev) => (prev.includes(s) ? prev.filter((x) => x !== s) : [...prev, s]));
   }
 
   async function generate() {
@@ -72,133 +67,136 @@ export default function Home() {
   }
 
   return (
-    <main style={{ maxWidth: 980, margin: "0 auto", padding: 24, fontFamily: "system-ui" }}>
-      <h1 style={{ fontSize: 34, marginBottom: 6 }}>Viral Hook Generator</h1>
-      <p style={{ marginTop: 0, opacity: 0.8 }}>
-        Creator lanes + short-form constraints = hooks that don’t sound like AI.
-      </p>
+    <>
+      <Head>
+        <title>Viral Hook Generator</title>
+      </Head>
 
-      <div style={{ display: "grid", gap: 12, marginTop: 18 }}>
-        <label>
-          Topic
-          <input
-            value={topic}
-            onChange={(e) => setTopic(e.target.value)}
-            placeholder='e.g., "indie single dropping Friday—heartbreak but hopeful"'
-            style={{ width: "100%", padding: 10, marginTop: 6 }}
-          />
-        </label>
-
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-          <label>
-            Platform
-            <select
-              value={platform}
-              onChange={(e) => setPlatform(e.target.value as Platform)}
-              style={{ width: "100%", padding: 10, marginTop: 6 }}
-            >
-              {PLATFORMS.map((p) => (
-                <option key={p} value={p}>
-                  {p}
-                </option>
-              ))}
-            </select>
-          </label>
-
-          <label>
-            Creator Lane
-            <select
-              value={lane}
-              onChange={(e) => setLane(e.target.value as Lane)}
-              style={{ width: "100%", padding: 10, marginTop: 6 }}
-            >
-              {LANES.map((l) => (
-                <option key={l} value={l}>
-                  {l}
-                </option>
-              ))}
-            </select>
-          </label>
+      <div className="page">
+        <div className="hero">
+          <div className="logo">LYV LOUD</div>
+          <h1>Viral Hook Generator</h1>
+          <p>
+            Hooks optimized for short-form video. Fast to speak. Built to stop the
+            scroll.
+          </p>
         </div>
 
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 180px", gap: 12 }}>
-          <div>
-            <div style={{ fontWeight: 600, marginBottom: 6 }}>
-              Hook Styles (tap to toggle)
+        <div className="card">
+          <div className="controls">
+            <div className="row">
+              <div className="field" style={{ gridColumn: "1 / -1" }}>
+                <label>Topic</label>
+                <textarea
+                  className="input"
+                  rows={2}
+                  value={topic}
+                  onChange={(e) => setTopic(e.target.value)}
+                  placeholder="ex: indie single dropping Friday; theme: heartbreak but hopeful"
+                />
+              </div>
             </div>
-            <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-              {STYLES.map((s) => {
-                const on = styles.includes(s);
-                return (
-                  <button
-                    key={s}
-                    type="button"
-                    onClick={() => toggleStyle(s)}
-                    style={{
-                      padding: "8px 10px",
-                      cursor: "pointer",
-                      fontWeight: 700,
-                      opacity: on ? 1 : 0.55,
-                    }}
-                  >
-                    {s}
-                  </button>
-                );
-              })}
+
+            <div className="row">
+              <div className="field">
+                <label>Platform</label>
+                <select
+                  className="input"
+                  value={platform}
+                  onChange={(e) => setPlatform(e.target.value as Platform)}
+                >
+                  {PLATFORMS.map((p) => (
+                    <option key={p} value={p}>
+                      {p}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="field">
+                <label>Creator lane</label>
+                <select className="input" value={lane} onChange={(e) => setLane(e.target.value as Lane)}>
+                  {LANES.map((l) => (
+                    <option key={l} value={l}>
+                      {l}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="field">
+                <label>Count</label>
+                <input
+                  className="input"
+                  type="number"
+                  value={count}
+                  min={10}
+                  max={50}
+                  onChange={(e) => setCount(parseInt(e.target.value || "25", 10))}
+                />
+              </div>
             </div>
+
+            <div className="field" style={{ gridColumn: "1 / -1" }}>
+              <label>Hook styles (tap to toggle)</label>
+              <div className="pills">
+                {STYLES.map((s) => {
+                  const on = styles.includes(s);
+                  return (
+                    <button
+                      key={s}
+                      type="button"
+                      onClick={() => toggleStyle(s)}
+                      className={`pill ${on ? "pillOn" : "pillOff"}`}
+                    >
+                      {s}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            <button className="primary" onClick={generate} disabled={!canGenerate}>
+              {loading ? "Generating…" : "Generate Hooks"}
+            </button>
+
+            {error && <div className="error">{error}</div>}
+
+            {hooks.length > 0 && (
+              <section className="results" style={{ gridColumn: "1 / -1" }}>
+                <div className="resultsHead">
+                  <h2>Results</h2>
+                  <div className="row">
+                    <button className="copyBtn" onClick={copyAll}>
+                      Copy all
+                    </button>
+                    <button className="copyBtn" onClick={generate}>
+                      Regenerate
+                    </button>
+                  </div>
+                </div>
+
+                <ol className="list">
+                  {hooks.map((h, i) => (
+                    <li key={i}>
+                      <div className="hookRow">
+                        <span style={{ flex: 1 }}>{h}</span>
+                        <button className="copyBtn" onClick={() => copyOne(h)}>
+                          Copy
+                        </button>
+                      </div>
+                    </li>
+                  ))}
+                </ol>
+              </section>
+            )}
           </div>
-
-          <label>
-            Count
-            <input
-              type="number"
-              value={count}
-              min={10}
-              max={50}
-              onChange={(e) => setCount(parseInt(e.target.value || "25", 10))}
-              style={{ width: "100%", padding: 10, marginTop: 6 }}
-            />
-          </label>
         </div>
 
-        <button
-          onClick={generate}
-          disabled={!canGenerate}
-          style={{ padding: 12, fontWeight: 800, cursor: canGenerate ? "pointer" : "not-allowed" }}
-        >
-          {loading ? "Generating..." : "Generate Hooks"}
-        </button>
-
-        {error && <div style={{ color: "crimson" }}>{error}</div>}
-
-        {hooks.length > 0 && (
-          <section style={{ marginTop: 10 }}>
-            <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
-              <h2 style={{ margin: 0 }}>Results</h2>
-              <button onClick={copyAll} style={{ padding: "8px 10px", cursor: "pointer" }}>
-                Copy All
-              </button>
-              <button onClick={generate} style={{ padding: "8px 10px", cursor: "pointer" }}>
-                Regenerate
-              </button>
-            </div>
-
-            <ol style={{ marginTop: 12, lineHeight: 1.7 }}>
-              {hooks.map((h, i) => (
-                <li key={i} style={{ display: "flex", gap: 10, alignItems: "center" }}>
-                  <span style={{ flex: 1 }}>{h}</span>
-                  <button
-                    onClick={() => copyOne(h)}
-                    style={{ padding: "6px 8px", cursor: "pointer" }}
-                  >
-                    Copy
-                  </button>
-                </li>
-              ))}
-            </ol>
-          </section>
-        )}
+        <footer>
+          Next step: add saves/collections + preset hook packs per lane.
+        </footer>
       </div>
-    </main>
+    </>
   );
 }
